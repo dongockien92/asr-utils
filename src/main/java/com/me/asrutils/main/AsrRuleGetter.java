@@ -3,6 +3,8 @@ package com.me.asrutils.main;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.me.asrutils.model.Action;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +17,7 @@ import java.util.Map;
 /**
  * Get all rules from system
  */
+@Slf4j
 public final class AsrRuleGetter {
     public static Map<String, Action> getRules() throws IOException {
         List<String> ruleIds = getRuleIds();
@@ -58,7 +61,6 @@ public final class AsrRuleGetter {
 
         StringBuilder sb = new StringBuilder();
         String line;
-        System.out.println("Standard Output:");
         BufferedReader stdout = new BufferedReader(new InputStreamReader(
                 powerShellProcess.getInputStream()));
         while ((line = stdout.readLine()) != null) {
@@ -66,15 +68,19 @@ public final class AsrRuleGetter {
         }
         stdout.close();
 
-        System.out.println("Standard Error:");
+        StringBuilder sbErr = new StringBuilder();
         BufferedReader stderr = new BufferedReader(new InputStreamReader(
                 powerShellProcess.getErrorStream()));
         while ((line = stderr.readLine()) != null) {
-            System.out.println(line);
+            sbErr.append(line);
         }
         stderr.close();
 
-        System.out.println("Done");
+        String err = sbErr.toString();
+        if (StringUtils.isNotBlank(err)) {
+            log.error(sbErr.toString());
+        }
+
         return sb.toString();
     }
 }
